@@ -13,7 +13,7 @@ import 'appScreenOrganizations/notification/notification.dart';
 import 'appScreenOrganizations/sectionsScreen/sectionsScreen.dart';
 import 'bloc/Cubit.dart';
 import 'bloc/states.dart';
-
+//1.1.0
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
