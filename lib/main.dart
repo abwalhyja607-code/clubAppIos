@@ -6,17 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import 'appScreenOrganizations/homePage/homePage.dart';
 import 'appScreenOrganizations/loginScren/loginScreen.dart';
 import 'appScreenOrganizations/notification/notification.dart';
 import 'appScreenOrganizations/sectionsScreen/sectionsScreen.dart';
 import 'bloc/Cubit.dart';
 import 'bloc/states.dart';
-
-//1.1.0
-
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -25,29 +19,33 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
 }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // الخطوة 1: تهيئة Firebase قبل أي شيء آخر
   try {
     await Firebase.initializeApp();
-
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-    final firebaseNotification = FirebaseNotification();
-    try {
-      await firebaseNotification.initNotifications();
-    } catch (e, st) {
-      print('Notification init error: $e');
-      FirebaseCrashlytics.instance.recordError(e, st);
-    }
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-    runApp(MyApp());
   } catch (e, st) {
     print("Firebase init error: $e");
+    // لا تستخدم Crashlytics هنا قبل التهيئة
+  }
+
+  // الخطوة 2: تهيئة Crashlytics بعد Firebase
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  // الخطوة 3: تشغيل Notifications بعد Firebase
+  final firebaseNotification = FirebaseNotification();
+  try {
+    await firebaseNotification.initNotifications();
+  } catch (e, st) {
+    print('Notification init error: $e');
     FirebaseCrashlytics.instance.recordError(e, st);
   }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // الخطوة 4: تشغيل التطبيق بعد كل التهيئات
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -63,15 +61,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    checkToken();
-
-    // استدعاء بعد أن يبنى الـ widget tree
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   CubitApp.get(context).checkTokenData();
-    // });
+    initApp();
   }
 
-  Future<void> checkToken() async {
+  Future<void> initApp() async {
+    // أي كود يعتمد Firebase يجب أن يكون بعد initializeApp
     String? token = await getTokenOrganization();
     setState(() {
       _token = token;
@@ -103,7 +97,9 @@ class _MyAppState extends State<MyApp> {
               )
                   : _token == null
                   ? LoginScreen()
-                  : cubit.dataCheckToken ? SectionScreen() : LoginScreen(),
+                  : cubit.dataCheckToken
+                  ? SectionScreen()
+                  : LoginScreen(),
             ),
           );
         },
@@ -111,4 +107,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
