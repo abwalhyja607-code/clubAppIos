@@ -1,39 +1,41 @@
-import 'package:club_app_organizations_section/appScreenOrganizations/notification/notificationScreen.dart';
-import 'package:club_app_organizations_section/saveToken/saveToken.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart'; // تم إنشاؤه بواسطة FlutterFire CLI
 import 'appScreenOrganizations/loginScren/loginScreen.dart';
-import 'appScreenOrganizations/notification/notification.dart';
+import 'appScreenOrganizations/notification/notificationScreen.dart';
 import 'appScreenOrganizations/sectionsScreen/sectionsScreen.dart';
 import 'bloc/Cubit.dart';
 import 'bloc/states.dart';
+import 'saveToken/saveToken.dart';
+import 'appScreenOrganizations/notification/notification.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   print("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // الخطوة 1: تهيئة Firebase قبل أي شيء آخر
-  try {
-    await Firebase.initializeApp();
-  } catch (e, st) {
-    print("Firebase init error: $e");
-    // لا تستخدم Crashlytics هنا قبل التهيئة
-  }
+  // 1. تهيئة Firebase بشكل صحيح لكل منصة
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // الخطوة 2: تهيئة Crashlytics بعد Firebase
+  // 2. تهيئة Crashlytics بعد Firebase
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  // الخطوة 3: تشغيل Notifications بعد Firebase
+  // 3. إعداد Firebase Messaging
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   final firebaseNotification = FirebaseNotification();
   try {
     await firebaseNotification.initNotifications();
@@ -42,9 +44,7 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(e, st);
   }
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // الخطوة 4: تشغيل التطبيق بعد كل التهيئات
+  // 4. تشغيل التطبيق
   runApp(const MyApp());
 }
 
