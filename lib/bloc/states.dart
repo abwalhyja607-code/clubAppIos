@@ -4,6 +4,7 @@ class ProjectInitialStates extends StatesApp{}
 class ChangeShowPassState extends StatesApp{}
 class ChangeShowLoadingState extends StatesApp{}
 class LoginOrganizationState extends StatesApp{}
+class LoginOrganizationSuccessState extends StatesApp{}
 class GetMembersDataState extends StatesApp{}
 class GetNotificationData extends StatesApp{}
 class GetManagersDataState extends StatesApp{}

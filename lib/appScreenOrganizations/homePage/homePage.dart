@@ -99,8 +99,7 @@ class HomePageState extends State<HomePage> {
                           if(!CubitApp.get(context).dataCheckToken){
                             deleteTokenOrganization();
                             NavigatorMethod(context: context, screen: LoginScreen());
-
-                          if (cubit.checkSubscriptionsBool) {
+                          }else if (cubit.checkSubscriptionsBool) {
                             if (index == 0) {
                               CubitApp.get(context).getMembersData(section_id: id_section);
                             } else if (index == 1) {
@@ -113,9 +112,10 @@ class HomePageState extends State<HomePage> {
                             NavigatorMethod(context: context, screen: MassageScreens());
                           }
 
+                          print("index : $index");
 
 
-                          }
+
 
 
                         });

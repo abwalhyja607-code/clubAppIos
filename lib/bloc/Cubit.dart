@@ -169,6 +169,8 @@ class CubitApp extends Cubit<StatesApp> {
           }
       );
 
+      emit(LoginOrganizationSuccessState());
+
     }
 
     var t = await getTokenOrganization();

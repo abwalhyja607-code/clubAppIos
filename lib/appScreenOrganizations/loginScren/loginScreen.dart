@@ -29,7 +29,13 @@ class LoginScreen extends StatelessWidget {
     return BlocProvider(
       create: (BuildContext context) => CubitApp(),
       child: BlocConsumer<CubitApp, StatesApp>(
-        listener: (BuildContext context, state) {},
+        listener: (BuildContext context, state) {
+
+          if(state is LoginOrganizationSuccessState){
+            NavigatorMethod(context: context, screen: SectionScreen());
+          }
+
+        },
         builder: (BuildContext context, Object? state) {
           var cubit = CubitApp.get(context);
 
@@ -243,11 +249,11 @@ class LoginScreen extends StatelessWidget {
                                             await cubit.checkSubscriptions(
                                                 context: context);
 
-                                            if (cubit.checkSubscriptionsBool) {
-                                              NavigatorMethod(
-                                                  context: context,
-                                                  screen: SectionScreen());
-                                            }
+                                            // if (cubit.checkSubscriptionsBool) {
+                                            //   NavigatorMethod(
+                                            //       context: context,
+                                            //       screen: SectionScreen());
+                                            // }
 
                                             cubit.showLoadingFun(i: false);
                                           } else {
