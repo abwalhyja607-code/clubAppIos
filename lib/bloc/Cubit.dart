@@ -156,18 +156,23 @@ class CubitApp extends Cubit<StatesApp> {
 
       var token = await getTokenOrganization();
 
-      var fcmToken = await FirebaseNotification().initNotifications();
-      var resFcm = await crud.postReqH(
-          linkSaveFcmToken,
-          headers: {
-            'Authorization': 'Bearer $token', // ⚠️ مهم: "Bearer" ومسافة والتوكن
-            'Accept': 'application/json',
-          },
 
-          {
-            "fcmToken" : "$fcmToken"
-          }
-      );
+      var fcmToken = await FirebaseNotification().initNotifications();
+      print("token in Cubit login : $fcmToken");
+      if(fcmToken != null) {
+        var resFcm = await crud.postReqH(
+            linkSaveFcmToken,
+            headers: {
+              'Authorization': 'Bearer $token',
+              // ⚠️ مهم: "Bearer" ومسافة والتوكن
+              'Accept': 'application/json',
+            },
+
+            {
+              "fcmToken": "$fcmToken"
+            }
+        );
+      }
 
       emit(LoginOrganizationSuccessState());
 
