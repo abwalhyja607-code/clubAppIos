@@ -11,9 +11,6 @@ import FirebaseMessaging
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
-    if FirebaseApp.app() == nil {
-        FirebaseApp.configure()
-    }
 
     GeneratedPluginRegistrant.register(with: self)
 
