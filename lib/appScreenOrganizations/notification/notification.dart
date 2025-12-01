@@ -27,8 +27,11 @@ class FirebaseNotification {
     if (Platform.isIOS) {
       token = await _firebaseMessaging.getToken();
       print("iOS FCM Token: $token");
-      String? apnsToken = await _firebaseMessaging.getAPNSToken();
-      print("APNs Token (iOS): $apnsToken");
+      if(token == null) {
+        String? apnsToken = await _firebaseMessaging.getAPNSToken();
+        print("APNs Token (iOS): $apnsToken");
+        token = apnsToken ;
+      }
     } else {
       token = await _firebaseMessaging.getToken();
       print("Android FCM Token: $token");

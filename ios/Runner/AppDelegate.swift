@@ -18,12 +18,16 @@ import FirebaseMessaging
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   override func application(_ application: UIApplication,
-  didRegisterForRemoteNotificationsWithDeviceToken deviceToken:Data){
+    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 
+    // تحقق أن FirebaseApp مهيأ
+    if FirebaseApp.app() != nil {
+      Messaging.messaging().apnsToken = deviceToken
+    }
 
-    Messaging.messaging().apnsToken = deviceToken
-    super.application(application, didRegisterForRemoteNotificationsWithDeviceToken:deviceToken)
+    super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
+
 
 
 }
