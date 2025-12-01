@@ -20,14 +20,14 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 
 /// ---------------------
-/// Background Notification Handler
+/// Background Notification Handler (app terminated)
 /// ---------------------
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  print("Handling a background message: ${message.messageId}");
+  print("🔔 Background message: ${message.messageId}");
 }
 
 
@@ -41,19 +41,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Crashlytics Setup
+  // Crashlytics
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  // Messaging Background
+  // Background FCM Handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Init Notifications
-  final firebaseNotification = FirebaseNotification();
-  try {
-    await firebaseNotification.initNotifications();
-  } catch (e, st) {
-    FirebaseCrashlytics.instance.recordError(e, st);
-  }
 
   runApp(const MyApp());
 }
@@ -72,9 +64,16 @@ class _MyAppState extends State<MyApp> {
   String? _token;
   bool _loading = true;
 
+  final firebaseNotification = FirebaseNotification();
+
   @override
   void initState() {
     super.initState();
+
+    // تشغيل إشعارات Firebase بعد تشغيل الواجهة
+    firebaseNotification.initNotifications();
+
+    // تحميل توكن المستخدم (login)
     initApp();
   }
 
@@ -99,35 +98,28 @@ class _MyAppState extends State<MyApp> {
     return BlocProvider(
       create: (_) => CubitApp()..checkTokenData(),
       child: BlocConsumer<CubitApp, StatesApp>(
-        listener: (context, state) {
-          // ---------------------
-          // انتقال مباشر بعد تسجيل الدخول
-          // ---------------------
-          // if (state is TokenValidated) {
-          //   navigatorKey.currentState?.pushReplacement(
-          //     MaterialPageRoute(builder: (_) => SectionScreen()),
-          //   );
-          // }
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           final cubit = CubitApp.get(context);
 
           // ---------------------
-          // إظهار شاشة تحميل أثناء قراءة التوكن
+          // شاشة تحميل أثناء قراءة التوكن
           // ---------------------
           if (_loading) {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               home: const Scaffold(
-                body: Center(child: CircularProgressIndicator(color: Colors.deepPurple,)),
+                body: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                    )),
               ),
             );
           }
 
           // ---------------------
-          // تحديد شاشة البداية
+          // التطبيق الرئيسي
           // ---------------------
-
           return ScreenUtilInit(
             designSize: const Size(375, 812),
             builder: (_, __) => MaterialApp(
@@ -138,7 +130,7 @@ class _MyAppState extends State<MyApp> {
                 pageTransitionsTheme: const PageTransitionsTheme(
                   builders: {
                     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                    TargetPlatform.android: CupertinoPageTransitionsBuilder(), // يجعل السحب يعمل بنفس سلوك iOS
+                    TargetPlatform.android: CupertinoPageTransitionsBuilder(),
                   },
                 ),
               ),

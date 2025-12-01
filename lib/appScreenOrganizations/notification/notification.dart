@@ -1,55 +1,56 @@
-import 'package:club_app_organizations_section/main.dart';
-import 'package:club_app_organizations_section/appScreenOrganizations/notification/notificationScreen.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import '../../main.dart';
+import 'notificationScreen.dart';
+
 
 class FirebaseNotification {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   Future<String?> initNotifications() async {
-    // طلب صلاحيات الإشعارات
-    await _firebaseMessaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    String? token;
 
-    // إعداد Local Notification
+    await _firebaseMessaging.requestPermission(alert: true, badge: true, sound: true);
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iOSInit = DarwinInitializationSettings();
-    const initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iOSInit,
-    );
+    const initSettings = InitializationSettings(android: androidInit, iOS: iOSInit);
 
-    await _flutterLocalNotificationsPlugin.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (payload) {
-        navigatorKey.currentState?.pushNamed(NotificationScreen.routeName);
-      },
-    );
+    await _flutterLocalNotificationsPlugin.initialize(initSettings,
+        onDidReceiveNotificationResponse: (payload) {
+          navigatorKey.currentState?.pushNamed(NotificationScreen.routeName);
+        });
 
-    // الحصول على FCM Token للمنصتين
-    String? token = await _firebaseMessaging.getToken();
-     print("FCM Token: $token");
+    if (Platform.isIOS) {
+      token = await _firebaseMessaging.getToken();
+      print("iOS FCM Token: $token");
+      String? apnsToken = await _firebaseMessaging.getAPNSToken();
+      print("APNs Token (iOS): $apnsToken");
+    } else {
+      token = await _firebaseMessaging.getToken();
+      print("Android FCM Token: $token");
+    }
 
-
-    // التعامل مع الرسائل في الخلفية
+    _listenTokenRefresh();
     _handleBackgroundNotifications();
 
-    // استقبال الرسائل أثناء تشغيل التطبيق وعرض إشعار محلي
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((message) {
       if (message.notification != null) {
         _showLocalNotification(
-          message.notification!.title ?? '',
-          message.notification!.body ?? '',
-        );
+            message.notification!.title ?? '', message.notification!.body ?? '');
       }
     });
 
     return token;
+  }
+
+  void _listenTokenRefresh() {
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      print("FCM Token refreshed: $newToken");
+    });
   }
 
   void _handleBackgroundNotifications() {
@@ -62,24 +63,14 @@ class FirebaseNotification {
     navigatorKey.currentState?.pushNamed(NotificationScreen.routeName);
   }
 
-  Future<void> _showLocalNotification(String title, String body) async {
+  Future _showLocalNotification(String title, String body) async {
     const androidDetails = AndroidNotificationDetails(
-      'fcm_channel',
-      'FCM Notifications',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+        'fcm_channel', 'FCM Notifications',
+        importance: Importance.max, priority: Priority.high);
     const iOSDetails = DarwinNotificationDetails();
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iOSDetails,
-    );
+    const notificationDetails =
+    NotificationDetails(android: androidDetails, iOS: iOSDetails);
 
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      notificationDetails,
-    );
+    await _flutterLocalNotificationsPlugin.show(0, title, body, notificationDetails);
   }
 }
