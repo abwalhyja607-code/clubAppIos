@@ -1,12 +1,39 @@
 import 'dart:io';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-class TestNotification extends StatelessWidget {
-  TestNotification({super.key});
+class TestNotification extends StatefulWidget {
+  const TestNotification({super.key});
+
+  @override
+  State<TestNotification> createState() => _TestNotificationState();
+}
+
+class _TestNotificationState extends State<TestNotification> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (!Platform.isIOS) {
+      // استمع لتغير APNs token
+      _firebaseMessaging.onTokenRefresh.listen((token) {
+        print("APNs token updated: $token");
+      });
+
+      _firebaseMessaging.getAPNSToken().then((token) {
+        if (token != null) {
+          print("Initial APNs token: $token");
+        }
+      });
+    } else {
+      // على أندرويد
+      _firebaseMessaging.getToken().then((token) {
+        print("FCM token: $token");
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,32 +41,15 @@ class TestNotification extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            // Source - https://stackoverflow.com/a
-            // Posted by MSARKrish
-            // Retrieved 2025-12-01, License - CC BY-SA 4.0
-
             if (Platform.isIOS) {
-              await Future.delayed(Duration(seconds: 1));
-
-              String? apnsToken = await _firebaseMessaging.getAPNSToken();
-             
-                await Future<void>.delayed(const Duration(seconds: 3));
-                apnsToken = await _firebaseMessaging.getAPNSToken();
-              
-                print("token : $apnsToken");
-
-                  await Future.delayed(Duration(seconds: 1));
-
-                _firebaseMessaging.getToken().then((t){
-                  print("token of t : $t");
-                });
-
-              await Future.delayed(Duration(seconds: 2));
-
+              String? token = await _firebaseMessaging.getAPNSToken();
+              print("Button APNs token: $token");
             } else {
+              String? token = await _firebaseMessaging.getToken();
+              print("Button FCM token: $token");
             }
           },
-          child: Text("check"),
+          child: Text("Check token"),
         ),
       ),
     );
