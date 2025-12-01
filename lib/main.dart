@@ -139,7 +139,7 @@ class _MyAppState extends State<MyApp> {
                 NotificationScreen.routeName: (_) => NotificationScreen(),
               },
               home: (_token == null)
-                  ? TestNotification()
+                  ? LoginScreen()
                   : SectionScreen(),
             ),
           );
