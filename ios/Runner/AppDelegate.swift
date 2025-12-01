@@ -10,10 +10,7 @@ import Firebase
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
 
-    // تجنب التهيئة المزدوجة
-    if FirebaseApp.app() == nil {
-        FirebaseApp.configure()
-    }
+
 
     GeneratedPluginRegistrant.register(with: self)
 
