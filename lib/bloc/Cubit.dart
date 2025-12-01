@@ -141,7 +141,6 @@ class CubitApp extends Cubit<StatesApp> {
       "password": password
     });
 
-    dataLogin = res;
     print("res : $res");
 
     if (res["status"] == "success") {
@@ -151,9 +150,9 @@ class CubitApp extends Cubit<StatesApp> {
       var token = await getTokenOrganization();
 
       try {
-        var fcmToken = await FirebaseNotification().initNotifications();
+        String? fcmToken = await FirebaseNotification().initNotifications();
         print("token in Cubit login : $fcmToken");
-        if (fcmToken != null) {
+
           await crud.postReqH(
               linkSaveFcmToken,
               headers: {
@@ -164,7 +163,7 @@ class CubitApp extends Cubit<StatesApp> {
                 "fcmToken": "$fcmToken"
               }
           );
-        }
+
       } catch (e) {
         print("Error initializing FCM token: $e");
         // الاستمرار حتى لو فشل FCM

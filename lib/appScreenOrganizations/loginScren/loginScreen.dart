@@ -31,9 +31,9 @@ class LoginScreen extends StatelessWidget {
       child: BlocConsumer<CubitApp, StatesApp>(
         listener: (BuildContext context, state) {
 
-          if(state is LoginOrganizationSuccessState){
-            NavigatorMethod(context: context, screen: SectionScreen());
-          }
+          // if(state is LoginOrganizationSuccessState){
+          //   NavigatorMethod(context: context, screen: SectionScreen());
+          // }
 
         },
         builder: (BuildContext context, Object? state) {

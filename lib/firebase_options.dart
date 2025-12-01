@@ -64,6 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '563950462964',
     projectId: 'clubnotification-c0a25',
     storageBucket: 'clubnotification-c0a25.firebasestorage.app',
+    iosClientId: '563950462964-26pdp2v7lj3166lil9qu0kbj3a7k91dc.apps.googleusercontent.com',
     iosBundleId: 'com.khadamat.clubapporganizationssection',
   );
 
