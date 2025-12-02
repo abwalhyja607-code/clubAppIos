@@ -17,6 +17,28 @@ class FirebaseNotification {
       sound: true,
     );
 
+
+    if(Platform.isIOS ){
+      if(settings.authorizationStatus == AuthorizationStatus.authorized){
+     // الحصول على Token الجهاز (استخدمه لإرسال إشعارات اختبارية)
+      String? token = await _messaging.getToken();
+      print("FCM Token: $token");
+
+      // معالجة الإشعارات عندما يكون التطبيق مفتوحًا
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('Received message: ${message.notification?.title}');
+        // يمكنك عرض إشعار محلي هنا باستخدام حزمة مثل flutter_local_notifications
+      });
+
+      return token ;
+      }else{
+        return "Permission denied not AuthorizationStatus";
+      }
+    }
+
+
+
+
     if (settings.authorizationStatus != AuthorizationStatus.authorized &&
         settings.authorizationStatus != AuthorizationStatus.provisional) {
       debugPrint("User declined notifications");
