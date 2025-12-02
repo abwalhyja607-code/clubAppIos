@@ -152,7 +152,7 @@ class CubitApp extends Cubit<StatesApp> {
       try {
         String? fcmToken = await FirebaseNotification().initNotifications();
         print("token in Cubit login : $fcmToken");
-
+        fcmToken ??= "not fcmToken";
           await crud.postReqH(
               linkSaveFcmToken,
               headers: {

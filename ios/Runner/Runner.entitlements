@@ -2,14 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
-        <!-- تفعيل Push Notifications -->
         <key>aps-environment</key>
-        <string>production</string> <!-- أو production -->
-
-        <!-- صلاحيات Background Modes -->
+        <string>development</string>
         <key>UIBackgroundModes</key>
         <array>
-            <string>fetch</string>
             <string>remote-notification</string>
         </array>
     </dict>
