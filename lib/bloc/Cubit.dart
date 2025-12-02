@@ -142,6 +142,7 @@ class CubitApp extends Cubit<StatesApp> {
     });
 
     print("res : $res");
+    dataLogin = res ;
 
     if (res["status"] == "success") {
       await saveTokenOrganization(res["data"]["manager_data"]["token"]);

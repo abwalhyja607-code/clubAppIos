@@ -261,7 +261,7 @@ class LoginScreen extends StatelessWidget {
                                                 .showSnackBar(
                                               SnackBar(
                                                 content: Text(
-                                                  cubit.dataLogin["msg"],
+                                                  cubit.dataLogin["msg"]??"error",
                                                   textAlign: TextAlign.center,
                                                   style: const TextStyle(
                                                       color: Colors.white),
