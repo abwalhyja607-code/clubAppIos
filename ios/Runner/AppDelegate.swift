@@ -14,15 +14,17 @@ import FirebaseMessaging
     FirebaseApp.configure()
 
     UNUserNotificationCenter.current().delegate = self
+
+    // Set delegate AFTER class initialized
     Messaging.messaging().delegate = self
 
     UNUserNotificationCenter.current().requestAuthorization(
       options: [.alert, .sound, .badge]
     ) { granted, error in
       if let error = error {
-        print("خطأ في طلب الإذن: \(error)")
+        print("Auth Error: \(error)")
       } else {
-        print("تم منح الإذن: \(granted)")
+        print("Permission: \(granted)")
       }
     }
 
@@ -32,7 +34,7 @@ import FirebaseMessaging
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // APNs
+  // MARK: - APNs Token
   override func application(
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -40,15 +42,19 @@ import FirebaseMessaging
     Messaging.messaging().apnsToken = deviceToken
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
+}
 
-  // FCM token
+// MARK: - Messaging Delegate
+extension AppDelegate: MessagingDelegate {
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
     if let token = fcmToken {
       print("FCM Token: \(token)")
     }
   }
+}
 
-  // Foreground notification
+// MARK: - Notifications Delegate
+extension AppDelegate: UNUserNotificationCenterDelegate {
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     willPresent notification: UNNotification,
@@ -57,7 +63,6 @@ import FirebaseMessaging
     completionHandler([.alert, .sound, .badge])
   }
 
-  // Tap notification
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     didReceive response: UNNotificationResponse,
