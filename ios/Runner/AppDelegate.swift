@@ -11,8 +11,7 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // تهيئة Firebase
-    FirebaseApp.configure()
+
 
     // إعداد إشعارات iOS
     UNUserNotificationCenter.current().delegate = self
