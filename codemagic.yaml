@@ -2,25 +2,49 @@ workflows:
   ios-release:
     name: iOS Release Build
     environment:
+      flutter: stable            # يمنع إعادة تحميل Flutter كل مرة
+
       groups:
         - ios_credentials
+
       vars:
         FIREBASE_APP_ID: "1-563950462964-ios-a42d70b510fffff032bba1"
         FIREBASE_PROJECT_ID: "clubnotification-c0a25"
         GOOGLE_APPLICATION_CREDENTIALS_JSON: Encrypted(GOOGLE_APPLICATION_CREDENTIALS_JSON)
 
+    cache:
+      cache_default_paths: true
+      cache_paths:
+        - $HOME/.pub-cache
+        - ios/Pods
+        - $HOME/Library/Caches/CocoaPods
+        - $FLUTTER_ROOT/bin/cache
+        - build/
+
     scripts:
-      # 1. تثبيت Firebase CLI
+      # 1. تثبيت Firebase CLI (مرة واحدة فقط)
       - name: Install Firebase CLI
         script: |
-          curl -sL https://firebase.tools | bash
+          if ! command -v firebase &> /dev/null; then
+            echo "Installing Firebase CLI..."
+            curl -sL https://firebase.tools | bash
+          else
+            echo "Firebase CLI already installed."
+          fi
 
-      # 2. تثبيت dependencies الخاصة بـ Flutter
+      # 2. تثبيت Flutter dependencies
       - name: Install Flutter dependencies
         script: |
           flutter pub get
 
-      # 3. التحقق من قدرات iOS
+      # 3. تسريع CocoaPods عبر caching
+      - name: Install iOS Pods
+        script: |
+          cd ios
+          pod install --repo-update
+          cd ..
+
+      # 4. التحقق من قدرات iOS
       - name: Verify iOS Capabilities
         script: |
           echo "Checking Push Notifications capability..."
@@ -37,7 +61,7 @@ workflows:
           fi
           echo "✅ Background Modes capability found"
 
-      # 4. بناء IPA نسخة release
+      # 5. بناء IPA نسخة release
       - name: Build IPA
         script: |
           flutter build ipa --release
@@ -48,14 +72,14 @@ workflows:
           fi
           echo "✅ IPA built at $IPA_PATH"
 
-      # 5. رفع التطبيق إلى Firebase App Distribution
+      # 6. رفع التطبيق إلى Firebase App Distribution
       - name: Upload to Firebase App Distribution
         script: |
           echo "Setting up Firebase Service Account..."
           echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/service-account.json"
 
-          echo "Uploading IPA to Firebase App Distribution..."
+          echo "Uploading IPA to Firebase..."
           firebase appdistribution:distribute "$IPA_PATH" \
             --app "$FIREBASE_APP_ID" \
             --project "$FIREBASE_PROJECT_ID" \
