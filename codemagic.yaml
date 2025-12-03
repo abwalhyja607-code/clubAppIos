@@ -8,7 +8,7 @@ workflows:
         - ios_credentials
 
       vars:
-        FIREBASE_APP_ID: "1-563950462964-ios-a42d70b510fffff032bba1"
+        FIREBASE_APP_ID: "1:563950462964:ios:a42d70b510fffff032bba1"
         FIREBASE_PROJECT_ID: "clubnotification-c0a25"
         GOOGLE_APPLICATION_CREDENTIALS_JSON: Encrypted(GOOGLE_APPLICATION_CREDENTIALS_JSON)
         APNS_KEY_ID: Encrypted(APNS_KEY_ID)
@@ -27,10 +27,10 @@ workflows:
       - name: Install Firebase CLI
         script: |
           if ! command -v firebase &> /dev/null; then
-            echo "Installing Firebase CLI..."
+            printf "Installing Firebase CLI...\n"
             curl -sL https://firebase.tools | bash
           else
-            echo "Firebase CLI already installed."
+            printf "Firebase CLI already installed.\n"
           fi
 
       - name: Install Flutter dependencies
@@ -45,29 +45,29 @@ workflows:
 
       - name: Verify iOS Capabilities
         script: |
-          echo "Checking Push Notifications capability in Info.plist..."
+          printf "Checking Push Notifications capability in Info.plist...\n"
           if ! plutil -p ios/Runner/Info.plist | grep -q "aps-environment"; then
-            echo "⚠️ aps-environment not set in Info.plist"
+            printf "⚠️ aps-environment not set in Info.plist\n"
             exit 1
           fi
-          echo "✅ aps-environment found"
+          printf "✅ aps-environment found\n"
 
-          echo "Checking Background Modes (remote-notification)..."
+          printf "Checking Background Modes (remote-notification)...\n"
           if ! plutil -p ios/Runner/Info.plist | grep -q "remote-notification"; then
-            echo "⚠️ Background Modes not set"
+            printf "⚠️ Background Modes not set\n"
             exit 1
           fi
-          echo "✅ Background Modes found"
+          printf "✅ Background Modes found\n"
 
-          echo "Checking Runner.entitlements for Push Notifications..."
+          printf "Checking Runner.entitlements for Push Notifications...\n"
           if [ -f ios/Runner/Runner.entitlements ]; then
             if ! plutil -p ios/Runner/Runner.entitlements | grep -q "aps-environment"; then
-              echo "⚠️ aps-environment not set in Runner.entitlements"
+              printf "⚠️ aps-environment not set in Runner.entitlements\n"
               exit 1
             fi
-            echo "✅ Runner.entitlements OK"
+            printf "✅ Runner.entitlements OK\n"
           else
-            echo "⚠️ Runner.entitlements file not found"
+            printf "⚠️ Runner.entitlements file not found\n"
             exit 1
           fi
 
@@ -76,36 +76,37 @@ workflows:
           flutter build ipa --release
           IPA_PATH="build/ios/ipa/Runner.ipa"
           if [ ! -f "$IPA_PATH" ]; then
-            echo "❌ IPA not found"
+            printf "❌ IPA not found\n"
             exit 1
           fi
-          echo "✅ IPA built at $IPA_PATH"
+          printf "✅ IPA built at $IPA_PATH\n"
 
       - name: Upload to Firebase App Distribution
         script: |
-          echo "Checking GOOGLE_APPLICATION_CREDENTIALS_JSON..."
+          printf "Checking GOOGLE_APPLICATION_CREDENTIALS_JSON...\n"
           if [ -z "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
-            echo "❌ GOOGLE_APPLICATION_CREDENTIALS_JSON is not set!"
+            printf "❌ GOOGLE_APPLICATION_CREDENTIALS_JSON is not set!\n"
             exit 1
           fi
-          echo "✅ GOOGLE_APPLICATION_CREDENTIALS_JSON is set"
+          printf "✅ GOOGLE_APPLICATION_CREDENTIALS_JSON is set\n"
 
-          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/service-account.json"
+          # Save service account JSON correctly
+          printf "%s" "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > "$CM_BUILD_DIR/service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/service-account.json"
 
           IPA_PATH="build/ios/ipa/Runner.ipa"
           if [ ! -f "$IPA_PATH" ]; then
-            echo "❌ IPA not found"
+            printf "❌ IPA not found\n"
             exit 1
           fi
-          echo "✅ IPA found at $IPA_PATH"
+          printf "✅ IPA found at $IPA_PATH\n"
 
-          echo "Uploading IPA to Firebase App Distribution..."
+          printf "Uploading IPA to Firebase App Distribution...\n"
           firebase appdistribution:distribute "$IPA_PATH" \
             --app "$FIREBASE_APP_ID" \
             --project "$FIREBASE_PROJECT_ID" \
             --release-notes "iOS Test Release" \
             --groups "clubIos"
 
-          rm service-account.json
-      
+          # Cleanup
+          rm "$CM_BUILD_DIR/service-account.json"
