@@ -13,7 +13,10 @@ workflows:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: Encrypted(GOOGLE_APPLICATION_CREDENTIALS_JSON)
         APNS_KEY_ID: Encrypted(APNS_KEY_ID)
         APNS_TEAM_ID: Encrypted(APNS_TEAM_ID)
-        APNS_AUTH_KEY: Encrypted(APNS_AUTH_KEY)
+        APNS_AUTH_KEY_PATH: ios/certs/push.p12
+        IOS_PROVISIONING_PROFILE_PATH: ios/certs/ClubApp__iOS__AppStore.mobileprovision
+        P12_PASSWORD: Encrypted(P12_PASSWORD)
+
 
     cache:
       cache_paths:
